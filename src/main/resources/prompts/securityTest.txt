@@ -1,0 +1,36 @@
+# 1. Register — expect 201
+curl -i -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"bob@example.com","password":"correct-horse-battery"}'
+
+# 2. Duplicate register — NOW expect 409 with EMAIL_ALREADY_EXISTS
+curl -i -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"bob@example.com","password":"correct-horse-battery"}'
+
+# 3. Invalid email + short password — expect 400 with VALIDATION_FAILED and fieldErrors
+curl -i -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"not-an-email","password":"short"}'
+
+# 4. Wrong password login — expect 401 with INVALID_CREDENTIALS
+curl -i -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"bob@example.com","password":"wrong"}'
+
+# 5. Non-existent user login — expect 401 with INVALID_CREDENTIALS (same response as wrong pw)
+curl -i -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"nobody@example.com","password":"any-password"}'
+
+# 6. Protected endpoint, no token — expect 401 with AUTHENTICATION_REQUIRED
+curl -i http://localhost:8080/api/auth/me
+
+# 7. Protected endpoint, garbage token — expect 401 with AUTHENTICATION_REQUIRED
+curl -i http://localhost:8080/api/auth/me \
+  -H "Authorization: Bearer not-a-real-token"
+
+# 8. Malformed JSON — expect 400 with MALFORMED_REQUEST
+curl -i -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{not valid json'

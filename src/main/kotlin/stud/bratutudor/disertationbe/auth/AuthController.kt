@@ -3,10 +3,13 @@ package stud.bratutudor.disertationbe.auth
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import java.util.*
 
 @Controller
 @RequestMapping("/api/auth")
@@ -24,4 +27,11 @@ class AuthController(
         val response = authService.login(request)
         return ResponseEntity.ok(response)
     }
+
+    @GetMapping("/me")
+    fun test(@AuthenticationPrincipal userUID: UUID): ResponseEntity<Map<String, String>> {
+        return ResponseEntity.ok(mapOf("userID" to userUID.toString()))
+    }
+
+
 }
