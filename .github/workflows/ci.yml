@@ -1,0 +1,44 @@
+name: CI
+
+# Run on every push to main and on every pull request targeting main
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'          # caches Gradle deps between runs for speed
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # --- BUILD segment: compile main + test sources, no tests run yet ---
+      - name: Build
+        run: ./gradlew assemble --no-daemon
+
+      # --- TEST segment: run the JUnit test suite ---
+      - name: Test
+        run: ./gradlew test --no-daemon
+
+      # Optional but recommended for a thesis: attach the test report as
+      # evidence you can download/screenshot. (Check the current major version
+      # of upload-artifact before relying on it.)
+      - name: Upload test report
+        if: always()              # upload even when tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test/
