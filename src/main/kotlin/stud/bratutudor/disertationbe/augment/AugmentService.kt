@@ -26,7 +26,7 @@ class AugmentService(
     }
 
     private companion object {
-        const val MAX_TOKENS = 64
+        const val MAX_TOKENS = 32
         const val EMPTY_DOCUMENT_PROMPT = " "
     }
 }
