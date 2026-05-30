@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import stud.bratutudor.disertationbe.auth.AuthException
 import stud.bratutudor.disertationbe.mercury.MercuryException
+import stud.bratutudor.disertationbe.security.GuardException
 import java.time.Instant
 
 @RestControllerAdvice
@@ -80,6 +81,34 @@ class GlobalExceptionHandler {
                     status = 400,
                     code = "MALFORMED_REQUEST",
                     message = "Request body could not be parsed."
+                )
+            )
+    }
+
+    @ExceptionHandler(GuardException.ContentTooLarge::class)
+    fun handleContentTooLarge(ex: GuardException.ContentTooLarge): ResponseEntity<ErrorResponse> {
+        log.warn("Content rejected by guard: length exceeded limit {}", ex.limit)
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(
+                ErrorResponse(
+                    status = 400,
+                    code = "CONTENT_TOO_LARGE",
+                    message = "The submitted content is too large to process."
+                )
+            )
+    }
+
+    @ExceptionHandler(GuardException.SuspiciousContent::class)
+    fun handleSuspiciousContent(ex: GuardException.SuspiciousContent): ResponseEntity<ErrorResponse> {
+        log.warn("Content rejected by guard: category={}", ex.category)
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(
+                ErrorResponse(
+                    status = 400,
+                    code = "SUSPICIOUS_CONTENT",
+                    message = "The submitted content was rejected by the content guard."
                 )
             )
     }

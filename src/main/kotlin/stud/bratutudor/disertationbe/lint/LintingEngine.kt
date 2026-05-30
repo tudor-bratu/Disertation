@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import stud.bratutudor.disertationbe.common.LintFinding
 import stud.bratutudor.disertationbe.common.Severity
+import stud.bratutudor.disertationbe.security.PromptInjectionGuard
 
 @Component
 class LintingEngine(
@@ -11,7 +12,8 @@ class LintingEngine(
     private val semanticRules: List<SemanticRule>,
     private val documentParser: DocumentParser,
     private val semanticStage: SemanticStage,
-    private val gatekeeping: GatekeepingProperties     // NEW
+    private val gatekeeping: GatekeepingProperties,
+    private val guard: PromptInjectionGuard
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -23,6 +25,8 @@ class LintingEngine(
     }
 
     fun lint(document: String): LintResult {
+        guard.inspect(document)
+
         val paragraphs = documentParser.parse(document)
 
         val deterministicFindings = deterministicRules.flatMap { rule ->
