@@ -12,5 +12,5 @@ data class LintRequest(
 
 data class LintResponse(
     val findings: List<LintFinding>,
-    val semanticStageAvailable: Boolean = true
+    val semanticStage: SemanticStageStatus
 )

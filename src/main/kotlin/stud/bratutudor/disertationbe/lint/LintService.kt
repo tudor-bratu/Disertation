@@ -12,7 +12,7 @@ class LintService(
         val result = lintingEngine.lint(request.document)
         return LintResponse(
             result.findings,
-            result.semanticStageAvailable
+            result.semanticStage
         )
     }
 }
