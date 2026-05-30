@@ -10,6 +10,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import stud.bratutudor.disertationbe.auth.AuthException
+import stud.bratutudor.disertationbe.mercury.MercuryException
+import java.time.Instant
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -80,6 +82,45 @@ class GlobalExceptionHandler {
                     message = "Request body could not be parsed."
                 )
             )
+    }
+
+    @ExceptionHandler(MercuryException.ApiError::class)
+    fun handleMercuryApiError(ex: MercuryException.ApiError): ResponseEntity<ErrorResponse> {
+        log.error("Mercury API error: status={}, body={}", ex.statusCode, ex.responseBody)
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(
+            ErrorResponse(
+                timestamp = Instant.now(),
+                status = 502,
+                code = "UPSTREAM_ERROR",
+                message = "Upstream service returned an error"
+            )
+        )
+    }
+
+    @ExceptionHandler(MercuryException.MalformedResponse::class)
+    fun handleMalformedResponse(ex: MercuryException.MalformedResponse): ResponseEntity<ErrorResponse> {
+        log.error("Mercury returned malformed response: {}", ex.message)
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(
+            ErrorResponse(
+                timestamp = Instant.now(),
+                status = 502,
+                code = "UPSTREAM_MALFORMED",
+                message = "Upstream service returned an unexpected response"
+            )
+        )
+    }
+
+    @ExceptionHandler(MercuryException.TransportError::class)
+    fun handleTransport(ex: MercuryException.TransportError): ResponseEntity<ErrorResponse> {
+        log.error("Mercury transport error: {}", ex.message)
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(
+            ErrorResponse(
+                timestamp = Instant.now(),
+                status = 502,
+                code = "UPSTREAM_UNAVAILABLE",
+                message = "Upstream service is currently unavailable"
+            )
+        )
     }
 
     @ExceptionHandler(Exception::class)

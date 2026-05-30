@@ -21,7 +21,9 @@ data class MercuryChatRequest(
 data class MercuryAutocompleteRequest(
     val model: String = "mercury-edit-2",
     val prompt: String,
-    val suffix: String = ""
+    val suffix: String = "",
+    @JsonProperty("max_tokens")
+    val maxTokens: Int? = null
 )
 
 
